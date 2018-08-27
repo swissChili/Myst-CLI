@@ -7,6 +7,7 @@ import (
 	"os"
 	"./colors"
 	"encoding/json"
+	"strings"
 )
 
 type Ip struct {
@@ -15,7 +16,7 @@ type Ip struct {
 
 func main() {
 	ip := "http://ipinfo.io"
-	api := "http://localhost:8080"
+	api := "http://localhost:8080/::long::/::lat::/forecast"
 
 	fmt.Println(colors.Set("cyan", colors.Set("bold", "Myst CLI")))
 
@@ -23,8 +24,11 @@ func main() {
 
 	var user_ip Ip
 	json.Unmarshal(b, &user_ip)
+	user_coords := strings.Split(user_ip.Loc, ",")
+	long := user_coords[0]
+	lat := user_coords[1]
 
-	weather := getJson(api)
+	weather := getJson(format(api, "::long::", long, "::lat::", lat))
 
 	fmt.Printf("%s\n", weather)
 
@@ -44,4 +48,9 @@ func getJson ( url string ) []byte {
 		os.Exit(1)
 	}
 	return b
+}
+
+func format(format string, args ...string) string {
+    r := strings.NewReplacer(args...)
+    return r.Replace(format)
 }
