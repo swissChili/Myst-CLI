@@ -8,17 +8,29 @@ import (
 	"./colors"
 	"encoding/json"
 	"strings"
+	"strconv"
 )
 
 type Ip struct {
 	Loc string `json:"loc"`
 }
 
+type Day struct {
+	Summary string `json:"summary"`
+	TemperatureHigh float64 `json:"temperatureHigh"`
+	TemperatureLow float64 `json:"temperatureLow"`
+}
+
 func main() {
 	ip := "http://ipinfo.io"
-	api := "http://localhost:8080/::long::/::lat::/forecast"
+	api := "http://localhost:8080/::long::/::lat::/daily"
 
-	fmt.Println(colors.Set("cyan", colors.Set("bold", "Myst CLI")))
+	fmt.Println(colors.Set("blue", colors.Set("bold", `  ███╗   ███╗██╗   ██╗███████╗████████╗
+  ████╗ ████║╚██╗ ██╔╝██╔════╝╚══██╔══╝
+  ██╔████╔██║ ╚████╔╝ ███████╗   ██║   
+  ██║╚██╔╝██║  ╚██╔╝  ╚════██║   ██║   
+  ██║ ╚═╝ ██║   ██║   ███████║   ██║   
+  ╚═╝     ╚═╝   ╚═╝   ╚══════╝   ╚═╝ `)))
 
 	b := getJson(ip)
 
@@ -30,10 +42,24 @@ func main() {
 
 	weather := getJson(format(api, "::long::", long, "::lat::", lat))
 
-	fmt.Printf("%s\n", weather)
+	var days []Day
 
-	fmt.Printf("%s\n", user_ip.Loc)
+	json.Unmarshal(weather, &days)
+	fmt.Println(colors.Set("cyan", "  Forecast:"))
+	for i := 0; i < len(days); i++ {
+		fmt.Println("  -", days[i].Summary, colors.Set("red", strconv.FormatFloat(days[i].TemperatureHigh, 'f', 2, 32)), "\u00B0F")
+	}
 }	
+
+func putSpacing (str string, size int) string {
+	if len(str) <= size {
+		spacing := size - len(str)
+		spaces := strings.Repeat(" ", spacing)
+		return str + spaces
+	} else {
+		return str
+	}
+}
 
 func getJson ( url string ) []byte {
 	resp, err := http.Get(url)
