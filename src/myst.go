@@ -45,11 +45,22 @@ func main() {
 	var days []Day
 
 	json.Unmarshal(weather, &days)
-	fmt.Println(colors.Set("cyan", "  Forecast:"))
-	for i := 0; i < len(days); i++ {
-		fmt.Println("  -", days[i].Summary, colors.Set("red", strconv.FormatFloat(days[i].TemperatureHigh, 'f', 2, 32)), "\u00B0F")
+	lineMax := 0
+	for i :=0; i < len(days); i++ {
+		sumLen := strings.Split(days[i].Summary, "")
+		if len(sumLen) >  lineMax {
+			lineMax = len(sumLen)
+		}
 	}
-}	
+	fmt.Println(colors.Set("bold", "  Forecast:"))
+	for i := 0; i < len(days); i++ {
+		fmt.Println("  -", colors.Set("cyan", putSpacing(days[i].Summary, lineMax)), 
+			colors.Set("red", strconv.FormatFloat(days[i].TemperatureHigh, 'f', 2, 32)), 
+			"\u00B0F", 
+			colors.Set("blue", strconv.FormatFloat(days[i].TemperatureLow, 'f', 2, 32)), 
+			"\u00B0F")
+	}
+}
 
 func putSpacing (str string, size int) string {
 	if len(str) <= size {
